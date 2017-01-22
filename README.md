@@ -8,7 +8,7 @@ The search deepth is called `limit` and works for both category numbers and entr
 
 
 ### Some thoughts
-This is a raw implementation of web scraping of site www.revolico.com.
+
 
 I'm using promise-based http calls to handle pipelining work. The current implementation is not pretty, but it can get job done.
 
