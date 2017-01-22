@@ -5,13 +5,15 @@
   "repository": "https://github.com/yaodingyd/web-scraper.git",
   "author": "Yao Ding",
   "scripts": {
-    "start" : "node index.js"
+    "start": "node index.js"
   },
   "license": "MIT",
   "dependencies": {
     "cheerio": "^0.22.0",
     "lodash": "^4.17.4",
+    "osmosis": "^1.1.2",
     "request": "^2.79.0",
-    "request-promise": "^4.1.1"
+    "request-promise": "^4.1.1",
+    "x-ray": "^2.3.1"
   }
 }
