@@ -1,15 +1,8 @@
-### Intro
-
-Run `npm install` and `npm start`.
-
-Console will log all scraping info as well a result.txt will be generated.
-
-The search deepth is called `limit` and works for both category numbers and entries in each category.
 
 
-### Some thoughts
+1. `npm install`: project setup.
 
+2. `npm start`: needs to setup db first. See `index.js` for info.
 
-I'm using promise-based http calls to handle pipelining work. The current implementation is not pretty, but it can get job done.
+3. `npm run log`: No need to setup dp. Scraping resuls displayed in console log. Only Scrapes the first page of each sub-category.
 
-I also think the basic methodology or implementation of all web scraping are quite similar, basically a http client plus a server-side html parser(whether it is PhantomJS or jsdom). The specific implementation of how to scraping the most valuable info for each site is the point here.   
