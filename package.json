@@ -5,7 +5,8 @@
   "repository": "https://github.com/yaodingyd/web-scraper.git",
   "author": "Yao Ding",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "log": "node index-log.js"
   },
   "license": "MIT",
   "dependencies": {
