@@ -60,14 +60,14 @@ osmosis
       listing.telephone = '';
     }
     let values = [];
-    console.log('Title is : ' + listing.title);
-    console.log('Email is : ' + listing.email);
-    console.log('Phone is : ' + listing.telephone);
-    console.log('Name  is : ' + listing.name);
-    console.log('Date  is : ' + listing.date);
-    console.log('URL   is : ' + listing.url);
-    console.log('Price is : ' + listing.price);
-    console.log('Image is : ' + listing.images);
+    console.log('Title  : ' + listing.title);
+    console.log('Email  : ' + listing.email);
+    console.log('Phone  : ' + listing.telephone);
+    console.log('Name   : ' + listing.name);
+    console.log('Date   : ' + listing.date);
+    console.log('URL    : ' + listing.url);
+    console.log('Price  : ' + listing.price);
+    console.log('Image  : ' + listing.images);
     console.log('*************************************************************************************');
     
 })
