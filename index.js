@@ -1,7 +1,8 @@
 var osmosis = require('osmosis');
 var fs = require('fs');
-var email = require('./email');
+var util = require('./util');
 var moment = require('moment');
+var encoding = require('encoding');
 
 moment.locale('es');
 
@@ -15,8 +16,6 @@ var connection = mysql.createConnection({
 });
 
 connection.connect();
-
-//let stream = fs.createWriteStream('result.txt');
 
 osmosis
 .get('https://www.revolico.com')
@@ -37,29 +36,32 @@ osmosis
 })
 .then(function(context, data){
   let contacts = context.find('#lineBlock');
-  for (let i = 1; i < contacts.length; i++) {
+  for (let i = 0; i < contacts.length; i++) {
       let title = contacts[i].find('.headingText2')[0].innerHTML;
       let content =  contacts[i].find('.normalText')[0].innerHTML;
-      if (title === 'Nombre: ') {
+      if (/^Nombre/.test(title)) {
         data['name'] = content;
       }
       if (/^Tel/.test(title)) {
         data['telephone'] = content;
       }
       if (/^Precio/.test(title)) {
-        data['price'] = content.match(/^[\d]+$/);
+        data['price'] =  parseInt(content.trim());
       }
-      if (/^Fec/.test(title)) {
+      if (/^Fecha/.test(title)) {
         data['date'] = content;
       }
   }
 })
 .data(function(listing) {
     if (listing.email) {
-      listing.email = email(listing.email);
+      listing.email = util.email(listing.email);
     } else {
-      listing.email = 'place@hold.it';
+      listing.email = '';
     }
+    listing.category = util.getCategory(listing.category);
+    listing.title = encoding.convert(listing.title, 'ISO-8859-1', 'UTF-8').toString();
+    listing.description = encoding.convert(listing.description, 'ISO-8859-1', 'UTF-8').toString();
     listing.images = listing.images.join('\n');
     if (listing.date) {
       listing.date = moment(listing.date, 'LLLL').format('YYYY-MM-DD hh:mm:ss');
@@ -71,12 +73,15 @@ osmosis
       listing.name = '';
     }
     if (!listing.telephone) {
-      listing.telephone = '';
+      let phone = listing.title.match(/[\d]{2}-[\d]{2}-[\d]{2}-[\d]{2}|[\d]{8}|[\d]{1,3}[\s]?[\d]{1,3}[\s]?[\d]{1,3}[\s][\d]{1,3}/);
+      if (phone && phone.length > 0) {
+        listing.telephone = phone[0];
+      } else {
+        listing.telephone = '';
+      }
+      listing.telephone = listing.telephone.replace(/\D+/g, '');
     }
     let values = [];
-    /*listing.forEach(function(item){
-      values.push(item);
-    })*/
     values.push(listing.title);
     values.push(listing.email);
     values.push(listing.telephone);
@@ -85,7 +90,9 @@ osmosis
     values.push(listing.url);
     values.push(listing.price);
     values.push(listing.images);
-    let SQL = 'INSERT INTO posts (title, emails, phones, contactname, postdate, urls, price, images) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    values.push(listing.category);
+    values.push(listing.description);
+    let SQL = 'INSERT INTO posts (title, emails, phones, contactname, postdate, urls, price, images, category, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     connection.query(SQL, values, function (error, results, fields) {
       if (error) throw error;
     });

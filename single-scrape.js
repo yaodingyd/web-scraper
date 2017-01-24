@@ -1,21 +1,15 @@
 var osmosis = require('osmosis');
-var util = require('./util');
+var email = require('./util').email;
+var fs = require('fs');
 var moment = require('moment');
 var encoding = require('encoding');
+let stream = fs.createWriteStream('result.txt');
 
 moment.locale('es');
 
 osmosis
-.get('https://www.revolico.com')
-.find('.module li a:first')
-.set('category')
-.follow('@href')
-.paginate('a.pagenav[title="Siguiente"]', 1)
-.find('.adsterix_set tr td > a:not([href^="javascript"])')
-.set({
-    'url':          '@href'         
-})
-.follow('@href')
+.get('https://www.revolico.com/computadoras/pc-de-escritorio/torres-de-6ta-generacion-desde-360-torres-4-ta-generacion-desde--17709411.html')
+.header('Content-Type', 'text/html; charset=utf-8')
 .set({
     'title':        'h1.headingText',
     'description':  '.showAdText',
@@ -34,7 +28,7 @@ osmosis
         data['telephone'] = content;
       }
       if (/^Precio/.test(title)) {
-        data['price'] =  parseInt(content.trim());
+        data['price'] = parseInt(content.trim());
       }
       if (/^Fecha/.test(title)) {
         data['date'] = content;
@@ -43,13 +37,12 @@ osmosis
 })
 .data(function(listing) {
     if (listing.email) {
-      listing.email = util.email(listing.email);
+      listing.email = email(listing.email);
     } else {
       listing.email = '';
     }
-    listing.category = util.getCategory(listing.category);
     listing.title = encoding.convert(listing.title, 'ISO-8859-1', 'UTF-8').toString();
-    listing.images = listing.images.join('\n');
+    listing.images = '';
     if (listing.date) {
       listing.date = moment(listing.date, 'LLLL').format('YYYY-MM-DD hh:mm:ss');
     }
@@ -60,7 +53,13 @@ osmosis
       listing.name = '';
     }
     if (!listing.telephone) {
-      listing.telephone = '';
+      let phone = listing.title.match(/[\d]{2}-[\d]{2}-[\d]{2}-[\d]{2}|[\d]{8}|[\d]{1,3}[\s]?[\d]{1,3}[\s]?[\d]{1,3}[\s][\d]{1,3}/);
+      if (phone.length > 0) {
+        listing.telephone = phone[0];
+      } else {
+        listing.telephone = '';
+      }
+      listing.telephone = listing.telephone.replace(/\D+/g, '');
     }
     let values = [];
     console.log('Title  : ' + listing.title);
@@ -71,7 +70,6 @@ osmosis
     console.log('URL    : ' + listing.url);
     console.log('Price  : ' + listing.price);
     console.log('Image  : ' + listing.images);
-    console.log('Category: ' + listing.category);
     console.log('*************************************************************************************');
     
 })
@@ -81,3 +79,17 @@ osmosis
 //.log(console.log)
 //.error(console.log)
 //.debug(console.log)
+
+/*var i = 7;
+
+osmosis
+.get('https://www.revolico.com')
+.find('.module li a')
+.set('category')
+.data(function(listing) {
+    stream.write('"' + listing.category + '": ' + i++ + ',\n');
+})
+.done(function(){
+  console.log('DONE!');
+})
+.log(console.log)*/
