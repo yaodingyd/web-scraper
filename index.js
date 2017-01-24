@@ -19,7 +19,7 @@ connection.connect();
 
 osmosis
 .get('https://www.revolico.com')
-.find('.module li a:first')
+.find('.module li a')
 .set('category')
 .follow('@href')
 .paginate('a.pagenav[title="Siguiente"]')
@@ -101,6 +101,6 @@ osmosis
   connection.end();
   console.log('DONE!');
 })
-//.log(console.log)
+.log(console.log)
 .error(console.log)
 //.debug(console.log)
