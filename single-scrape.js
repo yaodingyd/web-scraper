@@ -5,11 +5,12 @@ var moment = require('moment');
 var encoding = require('encoding');
 let stream = fs.createWriteStream('result.txt');
 
+var subCategory = require('./util').subCategory;
+
 moment.locale('es');
 
-osmosis
+/*osmosis
 .get('https://www.revolico.com/computadoras/pc-de-escritorio/torres-de-6ta-generacion-desde-360-torres-4-ta-generacion-desde--17709411.html')
-.header('Content-Type', 'text/html; charset=utf-8')
 .set({
     'title':        'h1.headingText',
     'description':  '.showAdText',
@@ -76,20 +77,39 @@ osmosis
 .done(function(){
   console.log('DONE!');
 })
-//.log(console.log)
+.log(console.log)
 //.error(console.log)
-//.debug(console.log)
+//.debug(console.log)*/
 
 /*var i = 7;
 
 osmosis
 .get('https://www.revolico.com')
-.find('.module li a')
+.find('.module li a@href')
 .set('category')
 .data(function(listing) {
-    stream.write('"' + listing.category + '": ' + i++ + ',\n');
+    stream.write('"' + listing.category + '",\n');
 })
 .done(function(){
   console.log('DONE!');
 })
 .log(console.log)*/
+
+
+
+function scrape(i){
+  let instance = osmosis.get('https://www.revolico.com' + subCategory[i]);
+  //instance.run();
+  instance.log(console.log)
+  .done(function(){
+    console.log('@@@@@@Finish ' + subCategory[i]);
+    if (i + 1 < 67) {
+      scrape(i+1);
+    }
+    else {
+      console.log('ALL DONE!');
+    }
+  })
+}
+
+scrape(0);
