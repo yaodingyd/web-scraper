@@ -117,7 +117,14 @@ function scrape(index, delay) {
 
     })
     //.log(console.log)
-    .error(console.log)
+    .error(function(error){
+      console.log(error);
+      setTimeout(function(){
+        process.nextTick(function(){
+          traverse(index);
+        })
+      }, 1000 * 30);
+    })
     .debug(console.log)
   }
 
