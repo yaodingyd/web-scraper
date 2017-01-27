@@ -5,7 +5,7 @@ function scrape(index, delay) {
   var moment = require('moment');
   var encoding = require('encoding');
   var subCategory = require('./util').subCategory;
-  delay = delay || 100;
+  delay = delay || 300;
 
   let stream = fs.createWriteStream('result.txt');
   moment.locale('es');
@@ -34,6 +34,7 @@ function scrape(index, delay) {
     })
     .delay(delay)
     .follow('@href')
+    .config('timeout', 1000)
     .set({
         'title':        'h1.headingText',
         'description':  '.showAdText',
@@ -107,7 +108,9 @@ function scrape(index, delay) {
       console.log('Finish subCategory ' + index);
       stream.write('Finish subCategory ' + index + '\n');
       if (index + 1 < 67) {
-        traverse(index + 1);
+        process.nextTick(function(){
+          traverse(index + 1);
+        })
       } else {
         console.log('DONE!');
       }
