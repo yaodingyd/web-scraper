@@ -1,10 +1,11 @@
-function scrape(index) {
+function scrape(index, delay) {
   var osmosis = require('osmosis');
   var fs = require('fs');
   var util = require('./util');
   var moment = require('moment');
   var encoding = require('encoding');
   var subCategory = require('./util').subCategory;
+  delay = delay || 100;
 
   let stream = fs.createWriteStream('result.txt');
   moment.locale('es');
@@ -31,6 +32,7 @@ function scrape(index) {
     .set({
         'url':          '@href'         
     })
+    .delay(delay)
     .follow('@href')
     .set({
         'title':        'h1.headingText',
@@ -111,9 +113,9 @@ function scrape(index) {
       }
 
     })
-    .log(console.log)
+    //.log(console.log)
     .error(console.log)
-    //.debug(console.log)
+    .debug(console.log)
   }
 
 }
