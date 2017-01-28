@@ -1,4 +1,4 @@
-function scrape(index, delay) {
+function scrape(index, filterEnable, delay) {
   var osmosis = require('osmosis');
   var fs = require('fs');
   var util = require('./util');
@@ -6,6 +6,7 @@ function scrape(index, delay) {
   var encoding = require('encoding');
   var subCategory = require('./util').subCategory;
   delay = delay || 300;
+  filterEnable = filterEnable || false;
 
   let stream = fs.createWriteStream('result.txt');
   moment.locale('es');
@@ -25,7 +26,7 @@ function scrape(index, delay) {
   traverse(index);
 
   function traverse(index){
-    osmosis
+    let instance = osmosis
     .get('https://www.revolico.com' + subCategory[index])
     .paginate('a.pagenav[title="Siguiente"]')
     .find('.adsterix_set tr td > a:not([href^="javascript"])')
@@ -61,48 +62,16 @@ function scrape(index, delay) {
       }
     })
     .data(function(listing) {
-        if (listing.email) {
-          listing.email = util.email(listing.email);
-        } else {
-          listing.email = '';
-        }
-        listing.category = index;//util.getCategory(listing.category);
-        listing.title = encoding.convert(listing.title, 'ISO-8859-1', 'UTF-8').toString();
-        listing.description = encoding.convert(listing.description, 'ISO-8859-1', 'UTF-8').toString();
-        listing.images = listing.images.join('\n');
-        if (listing.date) {
-          listing.date = moment(listing.date, 'LLLL').format('YYYY-MM-DD hh:mm:ss');
-        }
-        if (!listing.price) {
-          listing.price = '';
-        }
-        if (!listing.name) {
-          listing.name = '';
-        }
-        if (!listing.telephone) {
-          let phone = listing.title.match(/[\d]{2}-[\d]{2}-[\d]{2}-[\d]{2}|[\d]{8}|[\d]{1,3}[\s]?[\d]{1,3}[\s]?[\d]{1,3}[\s][\d]{1,3}/);
-          if (phone && phone.length > 0) {
-            listing.telephone = phone[0];
-          } else {
-            listing.telephone = '';
+      if (!filterEnable) {
+        insertToDB(listing);
+      } else {
+        let checkDup = 'SELECT id FROM posts WHERE urls = ?'
+        connection.query(checkDup, [listing.url], function(error, results, fields){
+          if (results.length === 0) {
+            insertToDB(listing);
           }
-          listing.telephone = listing.telephone.replace(/\D+/g, '');
-        }
-        let values = [];
-        values.push(listing.title);
-        values.push(listing.email);
-        values.push(listing.telephone);
-        values.push(listing.name);
-        values.push(listing.date);
-        values.push(listing.url);
-        values.push(listing.price);
-        values.push(listing.images);
-        values.push(listing.category);
-        values.push(listing.description);
-        let SQL = 'INSERT INTO posts (title, emails, phones, contactname, postdate, urls, price, images, category, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        connection.query(SQL, values, function (error, results, fields) {
-          if (error) throw error;
-        });
+        })   
+      }
     })
     .done(function(){
       console.log('Finish subCategory ' + index);
@@ -117,15 +86,53 @@ function scrape(index, delay) {
 
     })
     //.log(console.log)
-    .error(function(error){
-      console.log(error);
-      setTimeout(function(){
-        process.nextTick(function(){
-          traverse(index);
-        })
-      }, 1000 * 30);
-    })
+    .error(console.log)
     .debug(console.log)
+  }
+
+  function insertToDB(listing) {
+    if (listing.email) {
+      listing.email = util.email(listing.email);
+    } else {
+      listing.email = '';
+    }
+    listing.category = index;//util.getCategory(listing.category);
+    listing.title = encoding.convert(listing.title, 'ISO-8859-1', 'UTF-8').toString();
+    listing.description = encoding.convert(listing.description, 'ISO-8859-1', 'UTF-8').toString();
+    listing.images = listing.images.join('\n');
+    if (listing.date) {
+      listing.date = moment(listing.date, 'LLLL').format('YYYY-MM-DD hh:mm:ss');
+    }
+    if (!listing.price) {
+      listing.price = '';
+    }
+    if (!listing.name) {
+      listing.name = '';
+    }
+    if (!listing.telephone) {
+      let phone = listing.title.match(/[\d]{2}-[\d]{2}-[\d]{2}-[\d]{2}|[\d]{8}|[\d]{1,3}[\s]?[\d]{1,3}[\s]?[\d]{1,3}[\s][\d]{1,3}/);
+      if (phone && phone.length > 0) {
+        listing.telephone = phone[0];
+      } else {
+        listing.telephone = '';
+      }
+      listing.telephone = listing.telephone.replace(/\D+/g, '');
+    }
+    let values = [];
+    values.push(listing.title);
+    values.push(listing.email);
+    values.push(listing.telephone);
+    values.push(listing.name);
+    values.push(listing.date);
+    values.push(listing.url);
+    values.push(listing.price);
+    values.push(listing.images);
+    values.push(listing.category);
+    values.push(listing.description);
+    let SQL = 'INSERT INTO posts (title, emails, phones, contactname, postdate, urls, price, images, category, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    connection.query(SQL, values, function (error, results, fields) {
+      if (error) throw error;
+    });
   }
 
 }
