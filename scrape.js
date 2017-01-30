@@ -40,7 +40,7 @@ function scrape(index, filterEnable, delay) {
         'title':        'h1.headingText',
         'description':  '.showAdText',
         'images':       ['.photo-frame img@src'],
-        'email':        '#contact .normalText > a .__cf_email__@data-cfemail'
+        'email':        ['a .__cf_email__@data-cfemail']
     })
     .then(function(context, data){
       let contacts = context.find('#lineBlock');
@@ -92,11 +92,13 @@ function scrape(index, filterEnable, delay) {
 
   function insertToDB(listing) {
     if (listing.email) {
-      listing.email = util.email(listing.email);
+      listing.email =  listing.email.map(function(email){
+          return  util.email(email);
+        }).join(' ');
     } else {
       listing.email = '';
     }
-    listing.category = index;//util.getCategory(listing.category);
+    listing.category = index + 7;
     listing.title = encoding.convert(listing.title, 'ISO-8859-1', 'UTF-8').toString();
     listing.description = encoding.convert(listing.description, 'ISO-8859-1', 'UTF-8').toString();
     listing.images = listing.images.join('\n');
