@@ -1,16 +1,21 @@
 var scrape = require('./scrape');
 
-let nodup = false;
-let index = 0;
+var nodup = false;
+var index = 0;
 
-process.argv.forEach(function (val, index, array) {
+process.argv.forEach(function (val, i, array) {
   if (val === 'nodup') {
     nodup = true;
   }
   if (val === 'allcat') {
     index = 0;
   }
+  if (/\d/.test(val)) {
+    index = parseInt(val);
+  }
 });
+
+console.log('Scraping sub-category ' + index);
 
 /** 
  * @index           the index of sub-category to begin scraping

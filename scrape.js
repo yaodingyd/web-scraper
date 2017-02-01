@@ -76,18 +76,20 @@ function scrape(index, filterEnable, delay) {
     .done(function(){
       console.log('Finish subCategory ' + index);
       stream.write('Finish subCategory ' + index + '\n');
-      if (index + 1 < 67) {
+      /*if (index + 1 < 67) {
         process.nextTick(function(){
           traverse(index + 1);
         })
       } else {
         console.log('DONE!');
-      }
-
+      }*/
+      process.exit();
     })
     //.log(console.log)
     .error(console.log)
-    .debug(console.log)
+    .debug(function(msg) {
+      console.log('sub-category ' + index + '::' + msg);
+    })
   }
 
   function insertToDB(listing) {
