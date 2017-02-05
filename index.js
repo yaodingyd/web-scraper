@@ -15,7 +15,7 @@ process.argv.forEach(function (val, i, array) {
   }
 });
 
-console.log('Scraping sub-category ' + index);
+console.log('Scraping sub-category ' + index + ' nodup is ' + nodup);
 
 /** 
  * @index           the index of sub-category to begin scraping
