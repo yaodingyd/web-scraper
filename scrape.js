@@ -8,6 +8,8 @@ function scrape(index, filterEnable, delay) {
   delay = delay || 300;
   filterEnable = filterEnable || false;
 
+  var errorNumber = 0;
+
   let stream = fs.createWriteStream('result.txt');
   moment.locale('es');
 
@@ -83,10 +85,15 @@ function scrape(index, filterEnable, delay) {
       } else {
         console.log('DONE!');
       }*/
-      process.exit();
+      process.exit(0);
     })
     //.log(console.log)
-    .error(console.log)
+    .error(function(msg) {
+      console.log(msg);
+      if (++errorNumber > 100 ) {
+        process.exit(1);
+      }
+    })
     .debug(function(msg) {
       console.log('sub-category ' + index + '::' + msg);
     })
